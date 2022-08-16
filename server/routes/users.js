@@ -1,7 +1,9 @@
 const router = require('express').Router();
+const Sequelize = require('sequelize')
 const {
   models: { User },
 } = require('../db');
+const Op = Sequelize.Op
 
 /**
  * All of the routes in this are mounted on /api/users
@@ -35,6 +37,26 @@ router.post('/', async (req, res, next) => {
   }
 })
 
+router.get('/', async (req, res, next) => {
+  try{
+    let name = req.query.name
+  
+    const users = await User.findAll({
+      where: {
+        name: {
+          [Op.iLike]: "%ed%"
+        }
+      }
+    })
+
+    res.status(200).send(users)
+  }
+  catch (ex) {
+    next(ex)
+  }
+})
+
+
 router.get('/unassigned', async (req, res, next) => {
   try {
     const students = await User.findUnassignedStudents()
@@ -66,7 +88,7 @@ router.delete('/:id', async (req, res, next) => {
     //transforms any string into a number or NaN
     userId = parseInt(userId)
 
-    //sends 400 error if usderId is NaN
+    //sends 400 error if usderId is
     if(isNaN(userId)){
       res.sendStatus(400)
     }
