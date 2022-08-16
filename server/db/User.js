@@ -40,6 +40,7 @@ const User = db.define('user', {
       return false
     }
   }
+
   
   
 });

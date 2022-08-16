@@ -4,6 +4,7 @@ const {
   models: { User },
 } = require('../db');
 const Op = Sequelize.Op
+// const html = require('./public/index')
 
 /**
  * All of the routes in this are mounted on /api/users
@@ -114,9 +115,6 @@ router.delete('/:id', async (req, res, next) => {
   }
   
   catch (ex) {
-    // if (typeof req.params.id !== "number" ){
-    //   res.sendStatus(400)
-    // }
     next(ex)
   }
 })
@@ -145,7 +143,6 @@ router.put('/:id', async (req, res, next) => {
     res.status(200).send(newUser)
   }
   catch (ex) {
-    // res.sendStatus(404)
     next (ex)
   }
 })
