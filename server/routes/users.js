@@ -58,21 +58,28 @@ router.get('/teachers', async (req, res, next) => {
 })
 
 router.delete('/:id', async (req, res, next) => {
+
+  
   try {
-    const userId = req.params.id 
+    let userId = req.params.id
+    
+    //transforms any string into a number or NaN
+    userId = parseInt(userId)
 
-    //queries for all users with "userId"
-    const user = await User.findAll({
-      where: {
-        id: userId
-      }
-    })
-
-    //sends 404, if userId returns an empty array
-    if(user.length === 0) {
+    //sends 400 error if usderId is NaN
+    if(isNaN(userId)){
+      res.sendStatus(400)
+    }
+    //queries for user based on userId
+    let user = await User.findByPk(userId)
+    
+    //sends 404, if previous query is null
+    if(user === null) {
      return res.sendStatus(404)
     }
     
+    
+
     //deletes user if the userId is valid
     else {
       await User.destroy({
@@ -85,8 +92,39 @@ router.delete('/:id', async (req, res, next) => {
   }
   
   catch (ex) {
-    //sends status of 400 if userId is not a number
-    res.sendStatus(400)
+    // if (typeof req.params.id !== "number" ){
+    //   res.sendStatus(400)
+    // }
+    next(ex)
+  }
+})
+
+router.put('/:id', async (req, res, next) => {
+  
+
+  try {
+
+    const user = await User.findAll({
+      where: {
+        id: req.params.id
+      }
+    })
+  
+
+    if(user.length < 1) {
+      res.sendStatus(404)
+    }
+
+    let newUser = user[0].dataValues
+
+    newUser.name = req.body.name       
+    newUser.userType = req.body.userType
+
+    res.status(200).send(newUser)
+  }
+  catch (ex) {
+    // res.sendStatus(404)
+    next (ex)
   }
 })
 

@@ -67,11 +67,71 @@ User.findTeachersAndMentees = async function () {
     }
   })
 
- 
-  console.log(teachers)
-
   return teachers
 }
+
+User.prototype.getPeers = async function(){
+  const students = await User.findAll({
+    where: {
+      mentorId: this.mentorId
+    }
+  })
+  for (let i = 0; i < students.length; i++){
+    let studentId = students[i].dataValues.id
+    if (studentId === this.id){
+      students.splice(i, 1)
+    }
+  }
+
+  return students
+}
+
+User.beforeUpdate( async (user) => {
+  let mentorId = user.mentorId
+  
+  //Gathering all students matching the mentorId
+  let students = await User.findAll({
+    where: {
+      id: mentorId,
+      userType: "STUDENT"
+    }
+  })
+  //Loops through students array to see if targeted mentor is a Student
+  for (let i = 0; i < students.length; i++){
+    let studentId = students[i].dataValues.id
+    if(mentorId === studentId){
+      throw new Error
+    }
+  }
+
+})
+
+User.beforeUpdate(user => {
+  if ((user.userType === "TEACHER") && (user.mentorId !== null) ){
+    throw new Error
+  }
+})
+
+User.beforeUpdate( async (user) => {
+  let teacherId = user.id
+  
+  //finds student with a matching mentorId to teacherId
+  let student = await User.findAll({
+    where: {
+      mentorId: teacherId
+    }
+  })
+  
+  //Loops through student array to see if mentorId matches teacherId, if so then it will throw an error
+  for (let i = 0; i < student.length; i++){
+    let mentorId = student[i].dataValues.mentorId
+    if( mentorId === teacherId){
+      throw new Error
+    }
+  }
+})
+
+
 
 
 /**
